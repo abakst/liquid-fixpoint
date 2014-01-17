@@ -34,7 +34,10 @@ let is_interp t = t = set_tycon
 
 (* API *)
 let emp = ( Sy.of_string "Set_emp"
-          , So.t_func 1 [t_set (So.t_generic 0); So.t_bool] )
+            , So.t_func 1 [t_set (So.t_generic 0); So.t_bool] )
+
+let nul = ( Sy.of_string "Set_nul"
+            , So.t_func 1 [t_set (So.t_generic 0)] )
 
 let sng = ( Sy.of_string "Set_sng"
           , So.t_func 1 [So.t_generic 0; t_set (So.t_generic 0)] )
@@ -55,7 +58,7 @@ let dif = ( Sy.of_string "Set_dif"
 let sub = ( Sy.of_string "Set_sub" 
           , So.t_func 1 [t_set (So.t_generic 0); t_set (So.t_generic 0); So.t_bool] )
 
-let interp_syms = [emp; sng; mem; cup; cap; dif; sub]
+let interp_syms = [emp; nul; sng; mem; cup; cap; dif; sub]
 
 module MakeTheory(SMT : SMTSOLVER): 
   (THEORY with type context = SMT.context 
@@ -101,6 +104,14 @@ let set_emp : appDef  =
   ; sy_emb   = fun c ts es -> match ts, es with
                  | [t], [e] -> SMT.mkRel c Ast.Eq e (SMT.mkEmptySet c t)
                  | _        -> assertf "Set_emp: type mismatch"
+  }
+
+let set_nul : appDef  = 
+  { sy_name  = fst nul 
+  ; sy_sort  = snd nul 
+  ; sy_emb   = fun c ts es -> match ts, es with
+                 | [t], [] -> SMT.mkEmptySet c t
+                 | _        -> assertf "Set_nul: type mismatch"
   }
 
 let set_sng : appDef  = 
@@ -186,6 +197,7 @@ let mk_thy_sort def c ts =
 (* API *)
 let theories = 
   ([set_set], [set_emp; 
+               set_nul;
                set_sng; 
                set_mem; 
                set_cup; 

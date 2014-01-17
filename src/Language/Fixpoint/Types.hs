@@ -877,7 +877,6 @@ data BindEnv       = BE { be_size  :: Int
                         , be_binds :: M.HashMap BindId (Symbol, SortedReft) 
                         }
 
-
 data SubC a = SubC { senv  :: !IBindEnv
                    , sgrd  :: !Pred
                    , slhs  :: !SortedReft

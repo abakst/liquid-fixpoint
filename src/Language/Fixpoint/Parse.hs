@@ -113,6 +113,7 @@ languageDef =
                                      , ":="
                                      , "&", "^", "<<", ">>", "--"
                                      , "?", "Bexp" -- , "'"
+                                     , "∪", "∪1", "∩", "\2208", "\2209"
                                      ]
            }
 
@@ -196,6 +197,11 @@ exprFunP           =  (try exprFunSpacesP) <|> (try exprFunSemisP) <|> exprFunCo
 
 parenBrackets  = parens . brackets 
 
+handySetSngP = do reserved "{"
+                  e <- lexprP 
+                  reserved "}"
+                  return $ EApp (symbol "Set_sng") [e]
+                  
 expr2P = buildExpressionParser bops lexprP
 
 bops = [ [ Infix  (reservedOp "*"   >> return (EBin Times)) AssocLeft
@@ -205,8 +211,17 @@ bops = [ [ Infix  (reservedOp "*"   >> return (EBin Times)) AssocLeft
          , Infix  (reservedOp "+"   >> return (EBin Plus )) AssocLeft
          ]
        , [Infix  (reservedOp "mod" >> return (EBin Mod  )) AssocLeft]
+       , [Infix  (reservedOp "∪1"  >> return bSetCup1)     AssocLeft]
+       , [Infix  (reservedOp "∪"   >> return bSetCup)      AssocLeft]
+       , [Infix  (reservedOp "∩"   >> return bSetCap)      AssocLeft]
        ]
 
+bFun f args = EApp (symbol f) args
+
+bSetSng   x   = bFun "Set_sng" [x]
+bSetCup   x y = bFun "Set_cup" [x, y]
+bSetCup1  x y = bFun "Set_cup" [bSetSng y, x]
+bSetCap   x y = bFun "Set_cap" [x, y]
 
 exprCastP
   = do e  <- exprP 

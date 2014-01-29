@@ -1098,7 +1098,6 @@ instance Subable SortedReft where
 newtype Subst = Su [(Symbol, Expr)] deriving (Eq, Ord, Data, Typeable)
 
 substDom (Su s)          = map fst s
-mkSubst                  = Su -- . M.fromList
 appSubst (Su s) x        = fromMaybe (EVar x) (lookup x s)
 emptySubst               = Su [] -- M.empty
 

@@ -200,7 +200,7 @@ parenBrackets  = parens . brackets
 handySetSngP = do reserved "{"
                   e <- lexprP 
                   reserved "}"
-                  return $ EApp (symbol "Set_sng") [e]
+                  return $ EApp (dummyLoc $ symbol "Set_sng") [e]
                   
 expr2P = buildExpressionParser bops lexprP
 
@@ -216,7 +216,7 @@ bops = [ [ Infix  (reservedOp "*"   >> return (EBin Times)) AssocLeft
        , [Infix  (reservedOp "∩"   >> return bSetCap)      AssocLeft]
        ]
 
-bFun f args = EApp (symbol f) args
+bFun f args = EApp (dummyLoc $ symbol f) args
 
 bSetSng   x   = bFun "Set_sng" [x]
 bSetCup   x y = bFun "Set_cup" [x, y]

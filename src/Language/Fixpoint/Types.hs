@@ -109,12 +109,9 @@ module Language.Fixpoint.Types (
   -- * Substitutions 
   , Subst
   , Subable (..)
-  , mkSubst
-  -- , emptySubst
-  -- , catSubst
-  , substExcept
-  , substfExcept
-  , subst1Except
+  , substDom
+  , emptySubst, mkSubst, catSubst
+  , substExcept, substfExcept, subst1Except
   , sortSubst
 
   -- * Visitors
@@ -1100,6 +1097,8 @@ instance Subable SortedReft where
 
 newtype Subst = Su [(Symbol, Expr)] deriving (Eq, Ord, Data, Typeable)
 
+substDom (Su s)          = map fst s
+mkSubst                  = Su -- . M.fromList
 appSubst (Su s) x        = fromMaybe (EVar x) (lookup x s)
 emptySubst               = Su [] -- M.empty
 
@@ -1423,9 +1422,9 @@ instance Monoid Reft where
   mappend = meetReft
 
 meetReft r@(Reft (v, ras)) r'@(Reft (v', ras')) 
-  | v == v'          = Reft (v , ras  ++ ras')
-  | v == dummySymbol = Reft (v', ras' ++ (ras `subst1`  (v , EVar v'))) 
-  | otherwise        = Reft (v , ras  ++ (ras' `subst1` (v', EVar v )))
+  | v == v'          = Reft (v , nub $ ras  ++ ras')
+  | v == dummySymbol = Reft (v', nub $ ras' ++ (ras `subst1`  (v , EVar v'))) 
+  | otherwise        = Reft (v , nub $ ras  ++ (ras' `subst1` (v', EVar v )))
 
 instance Subable () where
   syms _      = []

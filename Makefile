@@ -8,21 +8,22 @@ CABALP=$(CABAL) install --ghc-options=$(OPTS) -p
 
 DEPS=unix-compat transformers mtl filemanip text parsec ghc-paths deepseq comonad contravariant semigroupoids semigroups bifunctors hscolour ansi-terminal hashable unordered-containers
 
+TASTY=./dist/build/test/test
+
 all:
-	$(CABAL) install --ghc-options=$(OPTS) 
+	$(CABAL) install --ghc-options=$(OPTS)
 
 force:
-	$(CABAL) install --force-reinstalls --ghc-options=$(OPTS) 
+	$(CABAL) install --force-reinstalls --ghc-options=$(OPTS)
 
-rebuild:
-	cd external/fixpoint/ && make clean && make && cd ../../
+rebuild: ocaml
 	make
 
 igoto:
-	$(CABAL) configure --ghc-options=$(OPTS) 
+	$(CABAL) configure --ghc-options=$(OPTS)
 
 goto:
-	$(CABAL) build --ghc-options=$(OPTS) 
+	$(CABAL) build --ghc-options=$(OPTS)
 	cp dist/build/liquid/liquid ~/.cabal/bin/
 
 prof:
@@ -43,3 +44,16 @@ pdeps:
 
 lint:
 	hlint --colour --report .
+
+tags:
+	hasktags -c src/
+	hasktags -e src/
+	hasktags -x -c src/
+
+test:
+	cabal configure -fdevel --enable-tests --disable-library-profiling -O2
+	cabal build
+	cabal exec $(TASTY)
+
+test710:
+	$(TASTY)
